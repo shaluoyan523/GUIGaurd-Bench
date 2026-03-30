@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "planner-eval"
+version = "0.1.0"
+description = "Open-source trajectory evaluation pipeline for UI planning models"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "backoff>=2.2.1",
+  "httpx>=0.27.0",
+  "instructor>=1.3.3",
+  "numpy>=1.26.0",
+  "openai>=1.40.0",
+  "pillow>=10.3.0",
+  "pydantic>=2.7.0",
+  "tiktoken>=0.7.0"
+]
+
+[project.scripts]
+planner-eval-pipeline = "planner_eval.pipeline:main"
+planner-eval-trajectory = "planner_eval.trajectory:main"
+planner-eval-judge = "planner_eval.judges.batch_evaluate_parameterized:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["planner_eval*"]
