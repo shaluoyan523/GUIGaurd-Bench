@@ -64,6 +64,7 @@ def build_agent(
     model_temperature: float | None = None,
     platform: str = "linux",
     max_trajectory_length: int = 8,
+    memory_mode: str = "auto",
     enable_reflection: bool = True,
 ) -> AgentS3:
     engine_params = {
@@ -72,6 +73,7 @@ def build_agent(
         "base_url": model_url,
         "api_key": model_api_key,
         "temperature": model_temperature,
+        "memory_mode": memory_mode,
     }
     grounding_agent = SimpleACI()
     return AgentS3(
@@ -228,6 +230,7 @@ def evaluate_directory(
     max_steps: int | None = None,
     platform: str = "linux",
     max_trajectory_length: int = 8,
+    memory_mode: str = "auto",
     enable_reflection: bool = True,
     output_file: str | Path | None = None,
 ) -> Dict[str, Any]:
@@ -240,6 +243,7 @@ def evaluate_directory(
         model_temperature=model_temperature,
         platform=platform,
         max_trajectory_length=max_trajectory_length,
+        memory_mode=memory_mode,
         enable_reflection=enable_reflection,
     )
     results = run_trajectory_evaluation(
@@ -273,6 +277,11 @@ def main() -> None:
     )
     parser.add_argument("--max-trajectory-length", type=int, default=8)
     parser.add_argument(
+        "--memory-mode",
+        default="auto",
+        choices=["auto", "online_full", "local_single_image"],
+    )
+    parser.add_argument(
         "--enable-reflection",
         action="store_true",
         default=True,
@@ -301,6 +310,7 @@ def main() -> None:
         max_steps=args.max_steps,
         platform=args.platform,
         max_trajectory_length=args.max_trajectory_length,
+        memory_mode=args.memory_mode,
         enable_reflection=args.enable_reflection,
         output_file=args.output_file,
     )

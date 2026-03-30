@@ -1,6 +1,8 @@
 from functools import partial
+import ipaddress
 import logging
 import textwrap
+from urllib.parse import urlparse
 from typing import Dict, List, Tuple
 
 from planner_eval.agents.grounding import ACI
@@ -19,6 +21,10 @@ from planner_eval.utils.formatters import (
 )
 
 logger = logging.getLogger("desktopenv.agent")
+
+ONLINE_FULL_MEMORY = "online_full"
+LOCAL_SINGLE_IMAGE_MEMORY = "local_single_image"
+AUTO_MEMORY = "auto"
 
 
 class Worker(BaseModule):
@@ -47,6 +53,7 @@ class Worker(BaseModule):
         super().__init__(worker_engine_params, platform)
 
         self.temperature = worker_engine_params.get("temperature", 0.0)
+        self.memory_mode = worker_engine_params.get("memory_mode", AUTO_MEMORY)
         self.use_thinking = worker_engine_params.get("model", "") in [
             "claude-opus-4-20250514",
             "claude-sonnet-4-20250514",
@@ -86,6 +93,55 @@ class Worker(BaseModule):
         self.cost_this_turn = 0
         self.screenshot_inputs = []
 
+    def _is_local_endpoint(self) -> bool:
+        base_url = str(self.engine_params.get("base_url", "") or "").strip()
+        if not base_url:
+            return False
+
+        try:
+            hostname = (urlparse(base_url).hostname or "").strip().lower()
+        except Exception:
+            return False
+
+        if not hostname:
+            return False
+        if hostname in {"localhost", "127.0.0.1", "::1", "0.0.0.0", "host.docker.internal"}:
+            return True
+        if hostname.endswith(".local"):
+            return True
+
+        try:
+            address = ipaddress.ip_address(hostname)
+        except ValueError:
+            return False
+        return address.is_loopback or address.is_private
+
+    def _resolve_memory_mode(self) -> str:
+        if self.memory_mode in {ONLINE_FULL_MEMORY, LOCAL_SINGLE_IMAGE_MEMORY}:
+            return self.memory_mode
+        return LOCAL_SINGLE_IMAGE_MEMORY if self._is_local_endpoint() else ONLINE_FULL_MEMORY
+
+    def _trim_agent_history_images(self, agent, keep_latest_images: int) -> None:
+        if agent is None:
+            return
+
+        image_count = 0
+        for i in range(len(agent.messages) - 1, -1, -1):
+            content = agent.messages[i].get("content")
+            if not isinstance(content, list):
+                continue
+
+            for j in range(len(content) - 1, -1, -1):
+                part = content[j]
+                if not isinstance(part, dict):
+                    continue
+                if "image" not in str(part.get("type", "")):
+                    continue
+
+                image_count += 1
+                if image_count > keep_latest_images:
+                    del content[j]
+
     def flush_messages(self):
         """Flush messages based on the model's context limits.
 
@@ -94,32 +150,17 @@ class Worker(BaseModule):
         Side Effects:
             - Modifies the messages of generator, reflection, and bon_judge agents to fit within the context limits.
         """
-        engine_type = self.engine_params.get("engine_type", "")
+        memory_mode = self._resolve_memory_mode()
 
-        # Flush strategy for long-context models: keep all text, only keep latest images
-        if engine_type in ["anthropic", "openai", "gemini"]:
-            max_images = self.max_trajectory_length
+        if memory_mode == ONLINE_FULL_MEMORY:
+            return
+
+        if memory_mode == LOCAL_SINGLE_IMAGE_MEMORY:
             for agent in [self.generator_agent, self.reflection_agent]:
-                if agent is None:
-                    continue
-                # keep latest k images
-                img_count = 0
-                for i in range(len(agent.messages) - 1, -1, -1):
-                    for j in range(len(agent.messages[i]["content"])):
-                        if "image" in agent.messages[i]["content"][j].get("type", ""):
-                            img_count += 1
-                            if img_count > max_images:
-                                del agent.messages[i]["content"][j]
+                self._trim_agent_history_images(agent, keep_latest_images=1)
+            return
 
-        # Flush strategy for non-long-context models: drop full turns
-        else:
-            # generator msgs are alternating [user, assistant], so 2 per round
-            if len(self.generator_agent.messages) > 2 * self.max_trajectory_length + 1:
-                self.generator_agent.messages.pop(1)
-                self.generator_agent.messages.pop(1)
-            # reflector msgs are all [(user text, user image)], so 1 per round
-            if len(self.reflection_agent.messages) > self.max_trajectory_length + 1:
-                self.reflection_agent.messages.pop(1)
+        raise ValueError(f"Unsupported memory_mode: {memory_mode}")
 
     def _generate_reflection(self, instruction: str, obs: Dict) -> Tuple[str, str]:
         """

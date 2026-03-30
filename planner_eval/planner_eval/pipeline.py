@@ -226,6 +226,7 @@ def run_task(
     task: TaskTarget,
     max_steps: int = 30,
     max_trajectory_length: int = 8,
+    memory_mode: str = "auto",
     enable_reflection: bool = True,
     mask_type: str | None = None,
 ) -> Path:
@@ -254,6 +255,7 @@ def run_task(
         max_steps=max_steps,
         platform="linux",
         max_trajectory_length=max_trajectory_length,
+        memory_mode=memory_mode,
         enable_reflection=enable_reflection,
         output_file=output_file,
     )
@@ -410,6 +412,7 @@ def run_pipeline(args) -> Path:
                 task=task,
                 max_steps=args.max_steps,
                 max_trajectory_length=args.max_trajectory_length,
+                memory_mode=args.memory_mode,
                 enable_reflection=not args.no_reflection,
             )
 
@@ -424,6 +427,7 @@ def run_pipeline(args) -> Path:
                 task=task,
                 max_steps=args.max_steps,
                 max_trajectory_length=args.max_trajectory_length,
+                memory_mode=args.memory_mode,
                 enable_reflection=not args.no_reflection,
             )
 
@@ -444,6 +448,7 @@ def run_pipeline(args) -> Path:
                         task=task,
                         max_steps=args.max_steps,
                         max_trajectory_length=args.max_trajectory_length,
+                        memory_mode=args.memory_mode,
                         enable_reflection=not args.no_reflection,
                         mask_type=mask_type,
                     )
@@ -460,6 +465,7 @@ def run_pipeline(args) -> Path:
                         task=task,
                         max_steps=args.max_steps,
                         max_trajectory_length=args.max_trajectory_length,
+                        memory_mode=args.memory_mode,
                         enable_reflection=not args.no_reflection,
                         mask_type=mask_type,
                     )
@@ -568,6 +574,11 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser.add_argument("--max-steps", type=int, default=30)
     parser.add_argument("--max-trajectory-length", type=int, default=8)
+    parser.add_argument(
+        "--memory-mode",
+        default="auto",
+        choices=["auto", "online_full", "local_single_image"],
+    )
     parser.add_argument("--no-reflection", action="store_true")
     return parser
 
