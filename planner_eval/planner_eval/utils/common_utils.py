@@ -53,7 +53,7 @@ def call_llm_safe(
     return response if response is not None else ""
 
 
-def call_llm_formatted(generator, format_checkers, **kwargs):
+def call_llm_formatted(generator, format_checkers, max_retries=10, **kwargs):
     """
     Calls the generator agent's LLM and ensures correct formatting.
 
@@ -61,6 +61,7 @@ def call_llm_formatted(generator, format_checkers, **kwargs):
         generator (ACI): The generator agent to call.
         obs (Dict): The current observation containing the screenshot.
         format_checkers (Callable): Functions that take the response and return a tuple of (success, feedback).
+        max_retries (int): Maximum number of formatting-retry rounds before returning the last response as-is.
         **kwargs: Additional keyword arguments for the LLM call.
 
     Returns:
@@ -86,6 +87,11 @@ def call_llm_formatted(generator, format_checkers, **kwargs):
                 feedback_msgs.append(feedback)
         if not feedback_msgs:
             # logger.info(f"Response formatted correctly on attempt {attempt} for {generator.engine.model}")
+            break
+        if attempt >= max_retries:
+            logger.warning(
+                f"Reached max_retries={max_retries} for {generator.engine.model}, using last response as-is."
+            )
             break
         logger.error(
             f"Response formatting error on attempt {attempt} for {generator.engine.model}. Response: {response} {', '.join(feedback_msgs)}"
