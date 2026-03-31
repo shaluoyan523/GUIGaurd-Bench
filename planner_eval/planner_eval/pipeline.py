@@ -555,7 +555,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--base-url", default=os.getenv("OPENAI_BASE_URL", ""))
     parser.add_argument("--temperature", type=float, default=None)
 
-    parser.add_argument("--judge-model", default="gpt-5")
+    parser.add_argument("--judge-model", default="openai/gpt-5")
     parser.add_argument(
         "--judge-api-key",
         default=os.getenv("JUDGE_API_KEY", os.getenv("OPENAI_API_KEY", "")),

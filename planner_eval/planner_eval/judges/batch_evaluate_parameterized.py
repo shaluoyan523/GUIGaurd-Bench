@@ -473,7 +473,7 @@ def main() -> None:
     parser.add_argument("--replay-dir", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--model-name", default="unknown")
-    parser.add_argument("--judge-model", default=os.getenv("JUDGE_MODEL", "gpt-5"))
+    parser.add_argument("--judge-model", default=os.getenv("JUDGE_MODEL", "openai/gpt-5"))
     parser.add_argument("--judge-api-key", default=os.getenv("JUDGE_API_KEY", ""))
     parser.add_argument("--judge-base-url", default=os.getenv("JUDGE_BASE_URL", ""))
     args = parser.parse_args()
