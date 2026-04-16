@@ -163,13 +163,13 @@ def extract_plans(data: dict) -> list[str]:
 
 def get_score_label(score: int) -> str:
     labels = {
-        0: "完全不一致",
-        1: "最低程度一致",
-        2: "部分一致",
-        3: "大部分一致",
-        4: "完全一致",
+        0: "Completely inconsistent",
+        1: "Minimally consistent",
+        2: "Partially consistent",
+        3: "Mostly consistent",
+        4: "Fully consistent",
     }
-    return labels.get(score, "未知")
+    return labels.get(score, "Unknown")
 
 
 def _coerce_score(score: Any) -> float:
@@ -253,7 +253,7 @@ def evaluate_mask_method(
 ) -> dict | None:
     print("")
     print("=" * 80)
-    print(f"评估 Mask 方法: {mask_name}")
+    print(f"Evaluating mask method: {mask_name}")
     print("=" * 80)
 
     gt_files = list(gt_dir.glob("*_result.json"))
@@ -274,9 +274,9 @@ def evaluate_mask_method(
         matched_pairs.append((gt_file, replay_file, replay_stem))
         seen_task_names.add(replay_stem)
 
-    print(f"找到 {len(matched_pairs)} 对样本")
+    print(f"Found {len(matched_pairs)} matched sample pairs")
     if not matched_pairs:
-        print(f"警告: 未找到 {mask_name} 的匹配样本")
+        print(f"Warning: no matched samples found for {mask_name}")
         return None
 
     all_results = []
@@ -319,16 +319,16 @@ def evaluate_mask_method(
     )
 
     print("")
-    print(f"{mask_name} 汇总:")
+    print(f"{mask_name} summary:")
     print(
-        f"  总分: {summary['summary']['total_score']}/{summary['summary']['max_score']}"
+        f"  Total score: {summary['summary']['total_score']}/{summary['summary']['max_score']}"
     )
-    print(f"  平均分: {summary['summary']['avg_score']:.2f}/4")
+    print(f"  Average score: {summary['summary']['avg_score']:.2f}/4")
     print(
-        "  平均一致性率: "
+        "  Average consistency rate: "
         f"{summary['summary']['avg_consistency_rate']:.2%}"
     )
-    print(f"  结果已保存: {output_file}")
+    print(f"  Results saved to: {output_file}")
     return summary
 
 
@@ -355,13 +355,13 @@ def run_batch_evaluation(
     mask_methods.sort()
 
     print("")
-    print(f"找到 {len(mask_methods)} 个 mask 方法: {', '.join(mask_methods)}")
+    print(f"Found {len(mask_methods)} mask methods: {', '.join(mask_methods)}")
 
     all_mask_results = []
     start_time = datetime.now()
     for index, mask_name in enumerate(mask_methods, start=1):
         print("")
-        print(f"[{index}/{len(mask_methods)}] 开始评估 {mask_name}...")
+        print(f"[{index}/{len(mask_methods)}] Starting evaluation for {mask_name}...")
         mask_result = evaluate_mask_method(
             mask_name=mask_name,
             gt_dir=gt_dir,
@@ -421,11 +421,11 @@ def run_batch_evaluation(
 
     print("")
     print("=" * 80)
-    print(f"评估完成！{model_name} 总体汇总：")
+    print(f"Evaluation complete. Overall summary for {model_name}:")
     print("=" * 80)
-    print(f"评估时长: {duration:.1f} 秒")
+    print(f"Evaluation time: {duration:.1f} seconds")
     print("")
-    print("Mask 方法排名（按平均分）：")
+    print("Mask method ranking by average score:")
     print("-" * 80)
     for rank, item in enumerate(
         sorted(
@@ -436,32 +436,32 @@ def run_batch_evaluation(
         start=1,
     ):
         print(
-            f"{rank:>2}. {item['mask_method']} - 平均: "
+            f"{rank:>2}. {item['mask_method']} - Average: "
             f"{item['summary']['avg_score']:.2f}/4 "
             f"({item['summary']['avg_consistency_rate']:.1%}) - "
-            f"总分: {item['summary']['total_score']}/{item['summary']['max_score']}"
+            f"Total score: {item['summary']['total_score']}/{item['summary']['max_score']}"
         )
     print("")
-    print("总体统计:")
+    print("Overall statistics:")
     print(
-        f"  总样本数: {overall_summary['overall_statistics']['total_samples']}"
+        f"  Total samples: {overall_summary['overall_statistics']['total_samples']}"
     )
     print(
-        "  总分: "
+        "  Total score: "
         f"{overall_summary['overall_statistics']['total_score']}/"
         f"{overall_summary['overall_statistics']['total_max_score']}"
     )
     print(
-        "  平均分: "
+        "  Average score: "
         f"{overall_summary['overall_statistics']['avg_score_across_all']:.2f}/4"
     )
     print(
-        "  平均一致性率: "
+        "  Average consistency rate: "
         f"{overall_summary['overall_statistics']['avg_consistency_rate_across_all']:.2%}"
     )
     print("")
-    print(f"所有结果已保存到: {output_dir}")
-    print(f"总汇总文件: {summary_file}")
+    print(f"All results saved to: {output_dir}")
+    print(f"Overall summary file: {summary_file}")
     print("=" * 80)
     return overall_summary
 

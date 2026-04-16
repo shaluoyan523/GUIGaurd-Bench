@@ -212,9 +212,9 @@ def resolve_task_target(base_dir: Path, platform: str, task_name: str) -> TaskTa
 
 def append_screenshot_log(output_subdir: Path, screenshot_dir: Path, mask_type: str | None = None) -> None:
     log_file = output_subdir / "screenshot_paths.log"
-    prefix = f"Mask类型: {mask_type} | " if mask_type else ""
+    prefix = f"Mask type: {mask_type} | " if mask_type else ""
     with log_file.open("a", encoding="utf-8") as handle:
-        handle.write(f"{prefix}截图路径: {screenshot_dir}\n")
+        handle.write(f"{prefix}Screenshot path: {screenshot_dir}\n")
 
 
 def run_task(
@@ -236,12 +236,12 @@ def run_task(
 
     logger.info("")
     logger.info("=" * 64)
-    logger.info("平台        : %s", platform)
-    logger.info("任务        : %s", task.name)
-    logger.info("指令        : %s", task.instruction)
-    logger.info("截图目录    : %s", task.screenshot_dir)
+    logger.info("Platform            : %s", platform)
+    logger.info("Task                : %s", task.name)
+    logger.info("Instruction         : %s", task.instruction)
+    logger.info("Screenshot directory: %s", task.screenshot_dir)
     if mask_type:
-        logger.info("Mask类型    : %s", mask_type)
+        logger.info("Mask type           : %s", mask_type)
     logger.info("=" * 64)
 
     results = evaluate_directory(
@@ -262,10 +262,10 @@ def run_task(
 
     append_screenshot_log(output_subdir, task.screenshot_dir, mask_type=mask_type)
     logger.info(
-        "任务完成，状态: %s",
+        "Task finished with status: %s",
         "completed" if results["completed"] else "failed" if results["failed"] else "incomplete",
     )
-    logger.info("结果文件: %s", output_file)
+    logger.info("Result file: %s", output_file)
     return output_file
 
 
