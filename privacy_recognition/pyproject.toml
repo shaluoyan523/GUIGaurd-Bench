@@ -13,11 +13,5 @@ dependencies = [
     "pillow>=10.0",
 ]
 
-[project.optional-dependencies]
-plots = [
-    "matplotlib>=3.7",
-    "numpy>=1.24",
-]
-
 [tool.setuptools]
 py-modules = ["privacy", "run_dataset"]

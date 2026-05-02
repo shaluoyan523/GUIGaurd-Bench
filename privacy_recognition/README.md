@@ -11,8 +11,7 @@ Included:
 - Multimodal privacy-recognition prompting for GUI screenshots.
 - Batch inference over Android-style and PC-style trajectory folders.
 - Parsing model outputs into region-level JSON labels.
-- Engineering and paper-style evaluation scripts.
-- Category-wise analysis and figure/table generation utilities.
+- IoU-only and paper-protocol privacy-recognition evaluation scripts.
 
 Excluded on purpose:
 
@@ -26,12 +25,6 @@ Excluded on purpose:
 ```bash
 cd privacy_recognition
 python -m pip install -e .
-```
-
-For plotting scripts:
-
-```bash
-python -m pip install -e '.[plots]'
 ```
 
 ## API Configuration
@@ -89,51 +82,31 @@ Outputs are written under `outputs/` by default and are ignored by git.
 
 ## Evaluation
 
-Engineering-style region evaluation:
+IoU-only evaluation:
 
 ```bash
-python experiments/evaluate_experiment_a.py \
+python experiments/evaluate_privacy_recognition_iou.py \
   --gt <ground_truth_json> \
   --android-root <android_dataset_root> \
   --pc-root <pc_dataset_root> \
   --pred-root outputs/predictions \
-  --output outputs/metrics/experiment_a/recognition_engineering.json
+  --output outputs/metrics/privacy_recognition_iou.json
 ```
 
-Paper-style evaluation adds relaxed text matching:
+This script matches privacy regions by bounding-box IoU only. It is useful for quick region-level debugging.
+
+Paper-style evaluation:
 
 ```bash
-python experiments/evaluate_experiment_a_paper.py \
+python experiments/evaluate_privacy_recognition_paper.py \
   --gt <ground_truth_json> \
   --android-root <android_dataset_root> \
   --pc-root <pc_dataset_root> \
   --pred-root outputs/predictions \
-  --output outputs/metrics/experiment_a/recognition_paper.json
+  --output outputs/metrics/privacy_recognition_paper.json
 ```
 
-Generate a compact recognition table:
-
-```bash
-python experiments/make_recognition_table_paper.py \
-  --model-result "ModelName=outputs/metrics/experiment_a/recognition_paper.json"
-```
-
-Generate the recognition cascade figure:
-
-```bash
-python experiments/plot_recognition_cascade_paper.py \
-  --model-result "ModelName=outputs/metrics/experiment_a/recognition_paper.json"
-```
-
-Generate category-wise heatmaps:
-
-```bash
-python experiments/plot_category_heatmap_paper.py \
-  --gt <ground_truth_json> \
-  --android-root <android_dataset_root> \
-  --pc-root <pc_dataset_root> \
-  --pred-root outputs/predictions
-```
+This script follows the paper protocol: a predicted privacy element must match both text and location before label accuracy is counted.
 
 ## Output Format
 
