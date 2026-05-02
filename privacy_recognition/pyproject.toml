@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "privacy-recognition"
+version = "0.1.0"
+description = "GUIGuard-Bench privacy-recognition inference and evaluation utilities."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "openai>=1.0",
+    "pillow>=10.0",
+]
+
+[project.optional-dependencies]
+plots = [
+    "matplotlib>=3.7",
+    "numpy>=1.24",
+]
+
+[tool.setuptools]
+py-modules = ["privacy", "run_dataset"]
