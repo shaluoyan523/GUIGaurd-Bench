@@ -1,0 +1,33 @@
+{
+  "manifest": "/path/to/manifest.jsonl",
+  "boxes": [
+    "/path/to/manual_click_boxes.jsonl"
+  ],
+  "image_roots": {
+    "original": "/path/to/images",
+    "black": "/path/to/black",
+    "replace_llm": "/path/to/replace_llm"
+  },
+  "models": [
+    "qwen3.5-397b-a17b",
+    "claude-sonnet-4-5-20250929",
+    "gemini-3.1-pro-preview"
+  ],
+  "masks": [
+    "original",
+    "black",
+    "replace_llm"
+  ],
+  "out_dir": "outputs/grounding_eval",
+  "base_url": "https://api.openai.com/v1",
+  "api_key_env": "OPENAI_API_KEY",
+  "workers": 4,
+  "start_id": 1,
+  "end_id": 290,
+  "jpeg_quality": 90,
+  "max_retries": 2,
+  "max_tokens": 1024,
+  "require_contiguous_ids": false,
+  "norm_modes": {},
+  "parse_modes": {}
+}
