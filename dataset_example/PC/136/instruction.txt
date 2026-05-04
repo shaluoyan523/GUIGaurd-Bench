@@ -1,0 +1,1 @@
+Create a line chart showing the trend of Heart Rate (column E) over time for all records. Place the chart in a new sheet named 'Chart'. The chart title should be 'Heart Rate Trend'.

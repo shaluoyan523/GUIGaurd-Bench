@@ -1,0 +1,1 @@
+Please create a new project in ChatGPT named 'Travel' and ask it to plan a trip from New York to Tokyo.

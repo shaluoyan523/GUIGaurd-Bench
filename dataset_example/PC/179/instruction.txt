@@ -1,0 +1,1 @@
+Check the number of saved passwords in Chrome browser, export a password security report, and save a screenshot of the report to the 'Privacy Documents' folder in Drive.
