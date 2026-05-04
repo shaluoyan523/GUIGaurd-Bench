@@ -18,6 +18,14 @@ RISK_GT_TO_SHORT = {
 }
 
 
+def resolve_platform_root(root, platform):
+    root = Path(root)
+    if root.name == platform:
+        return root
+    candidate = root / platform
+    return candidate if candidate.exists() else root
+
+
 def normalize_text(text):
     """Normalize text for paper-style character-coverage matching."""
     return "".join(str(text or "").strip().lower().split())
@@ -85,8 +93,8 @@ def load_gt(gt_path, android_root, pc_root):
     with open(gt_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    android_root = Path(android_root)
-    pc_root = Path(pc_root)
+    android_root = resolve_platform_root(android_root, "Android")
+    pc_root = resolve_platform_root(pc_root, "PC")
     raw_android = {str(x.relative_to(android_root)) for x in android_root.rglob("*.png")}
     raw_pc = {str(x.relative_to(pc_root)) for x in pc_root.rglob("*.png")}
 
@@ -133,10 +141,17 @@ def load_gt(gt_path, android_root, pc_root):
     return gt
 
 
-def load_predictions(pred_root):
-    predictions = {}
+def prediction_files(pred_root, model_dir=None):
     root = Path(pred_root)
-    for json_file in root.glob("*/*/qwen_qwen3-vl-32b-instruct/ai_results.json"):
+    if model_dir:
+        yield from root.glob(f"*/*/{model_dir}/ai_results.json")
+    else:
+        yield from root.glob("*/*/*/ai_results.json")
+
+
+def load_predictions(pred_root, model_dir=None):
+    predictions = {}
+    for json_file in prediction_files(pred_root, model_dir):
         platform = json_file.parents[2].name
         task = json_file.parents[1].name
         with open(json_file, "r", encoding="utf-8") as f:
@@ -189,6 +204,11 @@ def evaluate(gt, predictions, iou_threshold, text_threshold):
     for key, gt_labels in gt.items():
         platform = key[0]
         pred_labels = predictions.get(key)
+        for bucket_name in ("overall", platform):
+            bucket = result[bucket_name]
+            bucket["images_total"] += 1
+            if pred_labels is not None:
+                bucket["images_with_prediction"] += 1
         if pred_labels is None:
             continue
 
@@ -198,8 +218,6 @@ def evaluate(gt, predictions, iou_threshold, text_threshold):
 
         for bucket_name in ("overall", platform):
             bucket = result[bucket_name]
-            bucket["images_total"] += 1
-            bucket["images_with_prediction"] += 1
             bucket["binary_total"] += 1
             bucket["binary_correct"] += int(bool(gt_private) == bool(pred_private))
             bucket["gt_private_total"] += len(gt_private)
@@ -224,7 +242,7 @@ def evaluate(gt, predictions, iou_threshold, text_threshold):
         def safe_div(a, b):
             return 0.0 if b == 0 else a / b
 
-        bucket["coverage"] = safe_div(bucket["images_with_prediction"], 4080 if bucket is result["overall"] else (2470 if bucket is result["Android"] else 1610))
+        bucket["coverage"] = safe_div(bucket["images_with_prediction"], bucket["images_total"])
         bucket["binary_accuracy"] = safe_div(bucket["binary_correct"], bucket["binary_total"])
         bucket["privacy_recall"] = safe_div(bucket["matched_private"], bucket["gt_private_total"])
         bucket["overall_end_to_end"] = safe_div(bucket["strict_correct"], bucket["gt_private_total"])
@@ -249,6 +267,12 @@ def main():
         type=str,
         default="outputs/predictions",
         help="Root directory containing model predictions",
+    )
+    parser.add_argument(
+        "--model-dir",
+        type=str,
+        default=None,
+        help="Optional sanitized model output directory name. By default all model dirs are scanned.",
     )
     parser.add_argument(
         "--android-root",
@@ -281,7 +305,7 @@ def main():
     args = parser.parse_args()
 
     gt = load_gt(args.gt, args.android_root, args.pc_root)
-    predictions = load_predictions(args.pred_root)
+    predictions = load_predictions(args.pred_root, args.model_dir)
     result = evaluate(gt, predictions, args.iou, args.text_threshold)
 
     output_path = Path(args.output)

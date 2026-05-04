@@ -6,7 +6,8 @@ from pathlib import Path
 from typing import Any
 
 from .api import base_url_from_env, normalize_base_url
-from .data import build_samples
+from .data import build_samples, build_samples_from_example
+from .io_utils import write_json
 from .runner import run_evaluation
 
 
@@ -38,6 +39,14 @@ def _list_value(args_value: list[str] | None, config: dict[str, Any], key: str, 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="ScreenSpot-style GUI grounding evaluation.")
     parser.add_argument("--config", help="Optional JSON config file.")
+    parser.add_argument(
+        "--example-root",
+        help="Optional dataset_example root with Android/, PC/, and image_privacy_labels_example.json.",
+    )
+    parser.add_argument(
+        "--privacy-labels",
+        help="Optional privacy label JSON path used with --example-root.",
+    )
     parser.add_argument("--manifest", help="Manifest JSONL with id/image/plan/action fields.")
     parser.add_argument("--boxes", nargs="+", help="One or more JSONL files with id/bbox_xyxy/action fields.")
     parser.add_argument(
@@ -58,6 +67,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-retries", type=int)
     parser.add_argument("--max-tokens", type=int)
     parser.add_argument("--require-contiguous-ids", action="store_true")
+    parser.add_argument("--prepare-only", action="store_true", help="Build samples.json and exit without API calls.")
     parser.add_argument("--norm-mode", action="append", help="Per-model override in MODEL=MODE form.")
     parser.add_argument("--parse-mode", action="append", help="Per-model override in MODEL=MODE form.")
     return parser
@@ -68,38 +78,69 @@ def main() -> None:
     args = parser.parse_args()
     config = _read_config(args.config)
 
+    example_root = args.example_root or config.get("example_root") or config.get("dataset_example_root")
+    privacy_labels = args.privacy_labels or config.get("privacy_labels") or config.get("privacy_labels_path")
     manifest = args.manifest or config.get("manifest")
     boxes = args.boxes or config.get("boxes")
     image_roots = _parse_key_value(args.image_root) or {
         str(k): str(v) for k, v in (config.get("image_roots") or {}).items()
     }
-    if not manifest:
-        raise RuntimeError("Set --manifest or config.manifest")
-    if not boxes:
-        raise RuntimeError("Set --boxes or config.boxes")
-    if not image_roots:
-        raise RuntimeError("Set at least one --image-root MASK=PATH or config.image_roots")
 
     models = _list_value(args.models, config, "models", [])
-    masks = _list_value(args.masks, config, "masks", list(image_roots))
-    if not models:
+    masks = _list_value(args.masks, config, "masks", ["original"] if example_root else list(image_roots))
+    prepare_only = bool(args.prepare_only or config.get("prepare_only", False))
+    if not models and not prepare_only:
         raise RuntimeError("Set --models or config.models")
 
     out_dir = Path(args.out_dir or config.get("out_dir") or "outputs/grounding_eval")
+    start_id = args.start_id if args.start_id is not None else config.get("start_id")
+    end_id = args.end_id if args.end_id is not None else config.get("end_id")
+
+    if example_root:
+        samples = build_samples_from_example(
+            example_root=Path(example_root),
+            privacy_labels_path=Path(privacy_labels) if privacy_labels else None,
+            start_id=start_id,
+            end_id=end_id,
+        )
+    else:
+        if not manifest:
+            raise RuntimeError("Set --manifest/config.manifest or --example-root/config.example_root")
+        if not boxes:
+            raise RuntimeError("Set --boxes or config.boxes")
+        if not image_roots:
+            raise RuntimeError("Set at least one --image-root MASK=PATH or config.image_roots")
+        samples = build_samples(
+            manifest_path=Path(manifest),
+            boxes_paths=[Path(p) for p in boxes],
+            image_roots={mask: Path(path) for mask, path in image_roots.items()},
+            start_id=start_id,
+            end_id=end_id,
+            require_contiguous_ids=bool(args.require_contiguous_ids or config.get("require_contiguous_ids", False)),
+        )
+    if args.limit or config.get("limit"):
+        samples = samples[: int(args.limit or config["limit"])]
+
+    if prepare_only:
+        write_json(out_dir / "samples.json", [sample.to_json() for sample in samples])
+        print(
+            json.dumps(
+                {
+                    "out_dir": str(out_dir),
+                    "sample_count": len(samples),
+                    "masks": masks,
+                    "prepared": True,
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            flush=True,
+        )
+        return
+
     base_url = normalize_base_url(args.base_url or config.get("base_url") or base_url_from_env())
     if not base_url:
         raise RuntimeError("Set --base-url, config.base_url, GROUNDING_BASE_URL, or OPENAI_BASE_URL")
-
-    samples = build_samples(
-        manifest_path=Path(manifest),
-        boxes_paths=[Path(p) for p in boxes],
-        image_roots={mask: Path(path) for mask, path in image_roots.items()},
-        start_id=args.start_id if args.start_id is not None else config.get("start_id"),
-        end_id=args.end_id if args.end_id is not None else config.get("end_id"),
-        require_contiguous_ids=bool(args.require_contiguous_ids or config.get("require_contiguous_ids", False)),
-    )
-    if args.limit or config.get("limit"):
-        samples = samples[: int(args.limit or config["limit"])]
 
     summary = run_evaluation(
         samples=samples,

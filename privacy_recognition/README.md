@@ -62,7 +62,7 @@ PC-style task:
   step_1.png
 ```
 
-The batch runner accepts either a single task folder or a dataset root containing multiple task folders.
+The batch runner accepts a single task folder, `dataset_example/Android`, `dataset_example/PC`, or the top-level `dataset_example/` directory. Nested task folders are discovered recursively from `traj.jsonl`.
 
 ## Run Recognition
 
@@ -70,6 +70,15 @@ The batch runner accepts either a single task folder or a dataset root containin
 python run_dataset.py <task_or_dataset_root> \
   --model "<model_name>" \
   --output-root outputs/predictions
+```
+
+For the repository example data:
+
+```bash
+python run_dataset.py ../dataset_example \
+  --model "<model_name>" \
+  --output-root outputs/predictions \
+  --task-limit 2
 ```
 
 For a single Android-style task, the lightweight runner is also available:
@@ -87,8 +96,8 @@ IoU-only evaluation:
 ```bash
 python experiments/evaluate_privacy_recognition_iou.py \
   --gt <ground_truth_json> \
-  --android-root <android_dataset_root> \
-  --pc-root <pc_dataset_root> \
+  --android-root <dataset_example_or_android_root> \
+  --pc-root <dataset_example_or_pc_root> \
   --pred-root outputs/predictions \
   --output outputs/metrics/privacy_recognition_iou.json
 ```
@@ -100,13 +109,15 @@ Paper-style evaluation:
 ```bash
 python experiments/evaluate_privacy_recognition_paper.py \
   --gt <ground_truth_json> \
-  --android-root <android_dataset_root> \
-  --pc-root <pc_dataset_root> \
+  --android-root <dataset_example_or_android_root> \
+  --pc-root <dataset_example_or_pc_root> \
   --pred-root outputs/predictions \
   --output outputs/metrics/privacy_recognition_paper.json
 ```
 
 This script follows the paper protocol: a predicted privacy element must match both text and location before label accuracy is counted.
+
+Both evaluation scripts scan all model output directories under `outputs/predictions` by default. Pass `--model-dir <sanitized_model_name>` to evaluate one model directory.
 
 ## Output Format
 

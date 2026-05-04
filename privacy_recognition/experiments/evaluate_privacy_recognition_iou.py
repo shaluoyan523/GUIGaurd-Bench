@@ -25,6 +25,14 @@ RISK_GT_TO_SHORT = {
 }
 
 
+def resolve_platform_root(root, platform):
+    root = Path(root)
+    if root.name == platform:
+        return root
+    candidate = root / platform
+    return candidate if candidate.exists() else root
+
+
 def iou(box_a, box_b):
     ax1, ay1, ax2, ay2 = box_a
     bx1, by1, bx2, by2 = box_b
@@ -71,8 +79,8 @@ def load_gt(gt_path, android_root, pc_root):
     with open(gt_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    android_root = Path(android_root)
-    pc_root = Path(pc_root)
+    android_root = resolve_platform_root(android_root, "Android")
+    pc_root = resolve_platform_root(pc_root, "PC")
     raw_android = {str(x.relative_to(android_root)) for x in android_root.rglob("*.png")}
     raw_pc = {str(x.relative_to(pc_root)) for x in pc_root.rglob("*.png")}
 
@@ -121,10 +129,17 @@ def load_gt(gt_path, android_root, pc_root):
     return gt
 
 
-def load_predictions(pred_root):
-    predictions = {}
+def prediction_files(pred_root, model_dir=None):
     root = Path(pred_root)
-    for json_file in root.glob("*/*/qwen_qwen3-vl-32b-instruct/ai_results.json"):
+    if model_dir:
+        yield from root.glob(f"*/*/{model_dir}/ai_results.json")
+    else:
+        yield from root.glob("*/*/*/ai_results.json")
+
+
+def load_predictions(pred_root, model_dir=None):
+    predictions = {}
+    for json_file in prediction_files(pred_root, model_dir):
         platform = json_file.parents[2].name
         task = json_file.parents[1].name
         with open(json_file, "r", encoding="utf-8") as f:
@@ -303,6 +318,12 @@ def main():
         help="Root directory containing model predictions",
     )
     parser.add_argument(
+        "--model-dir",
+        type=str,
+        default=None,
+        help="Optional sanitized model output directory name. By default all model dirs are scanned.",
+    )
+    parser.add_argument(
         "--iou",
         type=float,
         default=0.6,
@@ -329,7 +350,7 @@ def main():
     args = parser.parse_args()
 
     gt = load_gt(args.gt, args.android_root, args.pc_root)
-    predictions = load_predictions(args.pred_root)
+    predictions = load_predictions(args.pred_root, args.model_dir)
     result = evaluate(gt, predictions, args.iou)
 
     output_path = Path(args.output)

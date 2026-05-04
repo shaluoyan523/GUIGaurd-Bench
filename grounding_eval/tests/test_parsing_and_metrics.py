@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+import json
+
+from PIL import Image
+
+from grounding_eval.data import build_samples_from_example
 from grounding_eval.metrics import normalize_point, point_in_bbox
 from grounding_eval.parsing import parse_prediction
 
@@ -38,3 +43,41 @@ def test_pixel_coordinates_and_hit() -> None:
     point, _ = normalize_point([100, 200], None, width=1080, height=2400, mode="pixel")
     assert point == [100, 200]
     assert point_in_bbox(point, (50, 100, 150, 250))
+
+
+def test_build_samples_from_dataset_example(tmp_path) -> None:
+    example_root = tmp_path / "dataset_example"
+    image_dir = example_root / "Android" / "2" / "images"
+    image_dir.mkdir(parents=True)
+    image_path = image_dir / "screen.png"
+    Image.new("RGB", (100, 200), "white").save(image_path)
+    (example_root / "Android" / "2" / "task_result.json").write_text(
+        json.dumps({"goal": "Open the settings screen"}),
+        encoding="utf-8",
+    )
+    (example_root / "image_privacy_labels_example.json").write_text(
+        json.dumps(
+            [
+                {
+                    "info": "dataset_example/Android/2/images/screen.png",
+                    "labels": [
+                        {
+                            "label": "low risk",
+                            "points": [10, 20, 30, 50],
+                            "attr": {"ocrResult": "Settings"},
+                        }
+                    ],
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    samples = build_samples_from_example(example_root=example_root)
+
+    assert len(samples) == 1
+    assert samples[0].image_name == "Android/2/images/screen.png"
+    assert samples[0].plan == "Open the settings screen"
+    assert samples[0].bbox_xyxy == (10.0, 20.0, 30.0, 50.0)
+    assert samples[0].target == "low risk | Settings"
+    assert samples[0].image_paths["original"] == str(image_path.resolve())

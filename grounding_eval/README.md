@@ -32,7 +32,46 @@ pytest
 
 ## Data Format
 
-The evaluator expects one manifest JSONL and one or more box JSONL files.
+The evaluator supports two data inputs:
+
+- The repository `dataset_example/` directory, for smoke tests and quick-start runs.
+- A full manifest JSONL plus one or more box JSONL files, for formal click-grounding evaluation.
+
+### `dataset_example`
+
+If the repository contains:
+
+```text
+dataset_example/
+  Android/<task_id>/images/...
+  PC/<task_id>/...
+  image_privacy_labels_example.json
+```
+
+build grounding samples directly from it:
+
+```bash
+grounding-eval \
+  --example-root ../dataset_example \
+  --prepare-only \
+  --out-dir outputs/dataset_example_grounding
+```
+
+This writes `outputs/dataset_example_grounding/samples.json` without making API calls. Each region-level privacy box is converted to one ScreenSpot-style target on the original screenshot. Use this path to verify that the example data can be loaded end to end. For full next-action click grounding, use the manifest/box format below.
+
+To run a model on the example data:
+
+```bash
+grounding-eval \
+  --example-root ../dataset_example \
+  --models <model-name> \
+  --masks original \
+  --out-dir outputs/dataset_example_grounding
+```
+
+### Manifest And Boxes
+
+For formal click-grounding evaluation, provide one manifest JSONL and one or more box JSONL files.
 
 Manifest rows should include:
 

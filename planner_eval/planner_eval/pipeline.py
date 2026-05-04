@@ -380,7 +380,7 @@ def run_pipeline(args) -> Path:
         if args.original_pc_base
         else None
     )
-    mask_dataset_root = Path(args.mask_dataset_root).resolve()
+    mask_dataset_root = Path(args.mask_dataset_root).resolve() if args.mask_dataset_root else None
 
     if original_android_base:
         logger.info("Resolved Android base: %s", original_android_base)
@@ -431,44 +431,49 @@ def run_pipeline(args) -> Path:
                 enable_reflection=not args.no_reflection,
             )
 
-    for mask_type in MASK_TYPES:
-        logger.info("")
-        logger.info("Running mask type: %s", mask_type)
-        mask_type_root = mask_dataset_root / mask_type
-        if original_android_base:
-            mask_android_base = resolve_platform_base(mask_type_root, "android")
-            for task_name in android_task_names:
-                task = resolve_task_target(mask_android_base, "android", task_name)
-                if task:
-                    run_task(
-                        model_config=model_config,
-                        run_dir=run_dir,
-                        output_subdir_name=f"masked_{mask_type}_android",
-                        platform="android",
-                        task=task,
-                        max_steps=args.max_steps,
-                        max_trajectory_length=args.max_trajectory_length,
-                        memory_mode=args.memory_mode,
-                        enable_reflection=not args.no_reflection,
-                        mask_type=mask_type,
-                    )
-        if original_pc_base:
-            mask_pc_base = resolve_platform_base(mask_type_root, "pc")
-            for task_name in pc_task_names:
-                task = resolve_task_target(mask_pc_base, "pc", task_name)
-                if task:
-                    run_task(
-                        model_config=model_config,
-                        run_dir=run_dir,
-                        output_subdir_name=f"masked_{mask_type}_pc",
-                        platform="pc",
-                        task=task,
-                        max_steps=args.max_steps,
-                        max_trajectory_length=args.max_trajectory_length,
-                        memory_mode=args.memory_mode,
-                        enable_reflection=not args.no_reflection,
-                        mask_type=mask_type,
-                    )
+    if args.skip_masks:
+        logger.info("Skipping masked trajectory runs.")
+    elif mask_dataset_root is None:
+        logger.warning("Mask dataset root not provided; skipping masked trajectory runs.")
+    else:
+        for mask_type in MASK_TYPES:
+            logger.info("")
+            logger.info("Running mask type: %s", mask_type)
+            mask_type_root = mask_dataset_root / mask_type
+            if original_android_base:
+                mask_android_base = resolve_platform_base(mask_type_root, "android")
+                for task_name in android_task_names:
+                    task = resolve_task_target(mask_android_base, "android", task_name)
+                    if task:
+                        run_task(
+                            model_config=model_config,
+                            run_dir=run_dir,
+                            output_subdir_name=f"masked_{mask_type}_android",
+                            platform="android",
+                            task=task,
+                            max_steps=args.max_steps,
+                            max_trajectory_length=args.max_trajectory_length,
+                            memory_mode=args.memory_mode,
+                            enable_reflection=not args.no_reflection,
+                            mask_type=mask_type,
+                        )
+            if original_pc_base:
+                mask_pc_base = resolve_platform_base(mask_type_root, "pc")
+                for task_name in pc_task_names:
+                    task = resolve_task_target(mask_pc_base, "pc", task_name)
+                    if task:
+                        run_task(
+                            model_config=model_config,
+                            run_dir=run_dir,
+                            output_subdir_name=f"masked_{mask_type}_pc",
+                            platform="pc",
+                            task=task,
+                            max_steps=args.max_steps,
+                            max_trajectory_length=args.max_trajectory_length,
+                            memory_mode=args.memory_mode,
+                            enable_reflection=not args.no_reflection,
+                            mask_type=mask_type,
+                        )
 
     evaluation_paths: dict[str, str] = {}
     if not args.skip_evaluation:
@@ -566,7 +571,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--skip-evaluation", action="store_true")
 
-    parser.add_argument("--mask-dataset-root", required=True)
+    parser.add_argument("--mask-dataset-root", default="")
+    parser.add_argument("--skip-masks", action="store_true")
     parser.add_argument("--original-android-base", default="")
     parser.add_argument("--original-pc-base", default="")
     parser.add_argument("--android-task", action="append", default=[])

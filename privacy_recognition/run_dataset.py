@@ -6,6 +6,33 @@ from pathlib import Path
 import privacy
 
 
+def is_supported_task_dir(task_dir: Path) -> bool:
+    if not (task_dir / "traj.jsonl").is_file():
+        return False
+    is_android = (task_dir / "task_result.json").is_file() and (task_dir / "images").is_dir()
+    is_pc = (task_dir / "instruction.txt").is_file()
+    return is_android or is_pc
+
+
+def discover_task_dirs(input_path: Path) -> list[Path]:
+    if is_supported_task_dir(input_path):
+        return [input_path]
+
+    task_dirs = {
+        traj_path.parent
+        for traj_path in input_path.rglob("traj.jsonl")
+        if is_supported_task_dir(traj_path.parent)
+    }
+    return sorted(task_dirs, key=lambda path: path.as_posix())
+
+
+def platform_name(task_dir: Path) -> str:
+    for path in (task_dir, *task_dir.parents):
+        if path.name in {"Android", "PC"}:
+            return path.name
+    return task_dir.parent.name
+
+
 def resolve_pc_image(task_dir: Path, screenshot_name: str) -> str | None:
     if not screenshot_name:
         return None
@@ -84,7 +111,7 @@ def run_task(task_dir: Path, model_name: str, output_root: Path, overwrite: bool
         raise ValueError(f"No usable image/response pairs: {task_dir}")
 
     model_dir = model_name.replace("/", "_").replace(":", "_")
-    output_dir = output_root / task_dir.parent.name / task_dir.name / model_dir
+    output_dir = output_root / platform_name(task_dir) / task_dir.name / model_dir
     json_file = output_dir / "ai_results.json"
     if json_file.is_file() and not overwrite:
         print(f"Skipping existing result: {json_file}")
@@ -152,13 +179,7 @@ def main():
     if not input_path.exists():
         raise FileNotFoundError(input_path)
 
-    if (input_path / "traj.jsonl").is_file():
-        task_dirs = [input_path]
-    else:
-        task_dirs = []
-        for path in sorted(input_path.iterdir()):
-            if path.is_dir() and (path / "traj.jsonl").is_file():
-                task_dirs.append(path)
+    task_dirs = discover_task_dirs(input_path)
 
     if args.task_limit is not None:
         task_dirs = task_dirs[: args.task_limit]

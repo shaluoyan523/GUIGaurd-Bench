@@ -1,0 +1,18 @@
+{
+  "example_root": "../dataset_example",
+  "masks": [
+    "original"
+  ],
+  "models": [
+    "qwen3.5-397b-a17b"
+  ],
+  "out_dir": "outputs/dataset_example_grounding",
+  "base_url": "https://api.openai.com/v1",
+  "api_key_env": "OPENAI_API_KEY",
+  "workers": 4,
+  "jpeg_quality": 90,
+  "max_retries": 2,
+  "max_tokens": 1024,
+  "norm_modes": {},
+  "parse_modes": {}
+}

@@ -39,6 +39,10 @@ The dataset page lists the dataset license as MIT.
 │   ├── tests/
 │   ├── README.md
 │   └── pyproject.toml
+├── privacy_recognition/
+│   ├── experiments/
+│   ├── README.md
+│   └── pyproject.toml
 └── grounding_eval/
     ├── grounding_eval/
     ├── configs/
@@ -60,6 +64,19 @@ Use it for:
 - Producing semantic-consistency scores and per-mask summaries.
 
 See [`planner_eval/README.md`](planner_eval/README.md) for package-specific details.
+
+### `privacy_recognition`
+
+`privacy_recognition` evaluates whether multimodal models can detect, localize, and classify privacy-sensitive GUI regions.
+
+Use it for:
+
+- Batch inference on Android and PC trajectory folders.
+- Region-level privacy prediction.
+- IoU-only or paper-style privacy-recognition scoring.
+- Smoke tests on `dataset_example/`.
+
+See [`privacy_recognition/README.md`](privacy_recognition/README.md) for package-specific details.
 
 ### `grounding_eval`
 
@@ -83,6 +100,7 @@ git clone <repository-url>
 cd GUIGaurd-Bench
 
 python -m pip install -e planner_eval
+python -m pip install -e privacy_recognition
 python -m pip install -e grounding_eval
 ```
 
@@ -118,6 +136,17 @@ huggingface-cli download \
 
 The exact directory names may depend on the dataset release. The evaluation scripts accept explicit paths, so keep the dataset outside the repository if desired and point the CLI arguments to your local copy.
 
+The repository also includes a small `dataset_example/` directory for smoke tests:
+
+```text
+dataset_example/
+├── Android/<task_id>/images/...
+├── PC/<task_id>/...
+└── image_privacy_labels_example.json
+```
+
+Use the full Hugging Face dataset for benchmark numbers; use `dataset_example/` only to verify that code paths and dependencies work.
+
 ## Environment Variables
 
 Both evaluation packages use OpenAI-compatible APIs. Do not commit real credentials.
@@ -150,6 +179,18 @@ planner-eval-pipeline \
   --skip-evaluation
 ```
 
+For a quick code-path check on the repository example data:
+
+```bash
+planner-eval-pipeline \
+  --model <planner-model> \
+  --api-key "$OPENAI_API_KEY" \
+  --original-android-base dataset_example/Android \
+  --original-pc-base dataset_example/PC \
+  --skip-masks \
+  --skip-evaluation
+```
+
 With judge scoring:
 
 ```bash
@@ -166,6 +207,28 @@ planner-eval-pipeline \
 
 Typical outputs are written under a run directory and include trajectory logs, per-mask evaluation JSON files, platform-level summaries, and an overall `summary.json`.
 
+## Quick Start: Privacy Recognition
+
+Run a small smoke test on the repository example data:
+
+```bash
+python privacy_recognition/run_dataset.py dataset_example \
+  --model <model-name> \
+  --output-root outputs/privacy_predictions \
+  --task-limit 2
+```
+
+Evaluate predictions against the example labels:
+
+```bash
+python privacy_recognition/experiments/evaluate_privacy_recognition_paper.py \
+  --gt dataset_example/image_privacy_labels_example.json \
+  --android-root dataset_example \
+  --pc-root dataset_example \
+  --pred-root outputs/privacy_predictions \
+  --output outputs/privacy_metrics.json
+```
+
 ## Quick Start: Grounding Evaluation
 
 The grounding evaluator expects:
@@ -173,6 +236,17 @@ The grounding evaluator expects:
 - A manifest JSONL with sample IDs, image names, plans, and target actions.
 - One or more box JSONL files with `bbox_xyxy` annotations.
 - One image root per evaluated image variant.
+
+For a quick code-path check on `dataset_example/`, build samples from the example privacy boxes:
+
+```bash
+grounding-eval \
+  --example-root dataset_example \
+  --prepare-only \
+  --out-dir outputs/dataset_example_grounding
+```
+
+This creates `outputs/dataset_example_grounding/samples.json` without API calls. Full benchmark grounding should use the manifest/box format:
 
 Example:
 

@@ -136,6 +136,20 @@ planner-eval-pipeline \
   --original-pc-base /data/PC
 ```
 
+For the repository `dataset_example/` directory, run only the original trajectories:
+
+```bash
+planner-eval-pipeline \
+  --model gpt-5 \
+  --api-key "$OPENAI_API_KEY" \
+  --original-android-base ../dataset_example/Android \
+  --original-pc-base ../dataset_example/PC \
+  --skip-masks \
+  --skip-evaluation
+```
+
+Use `--mask-dataset-root` only when protected variants such as `output_black_mask/` and `output_replace_llm_mask/` are available.
+
 ## Judge Model Configuration
 
 Judge scoring uses a separate OpenAI-compatible endpoint.
