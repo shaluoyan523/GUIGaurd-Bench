@@ -136,16 +136,31 @@ huggingface-cli download \
 
 The exact directory names may depend on the dataset release. The evaluation scripts accept explicit paths, so keep the dataset outside the repository if desired and point the CLI arguments to your local copy.
 
-The repository also includes a small `dataset_example/` directory for smoke tests:
+The repository also includes `dataset_example/`, a small review dataset for artifact evaluation and code-path smoke tests:
 
 ```text
 dataset_example/
-├── Android/<task_id>/images/...
-├── PC/<task_id>/...
+├── Android/
+│   └── <task_id>/
+│       ├── images/
+│       ├── step_*/
+│       ├── task_result.json
+│       └── traj.jsonl
+├── PC/
+│   └── <task_id>/
+│       ├── instruction.txt
+│       ├── traj.jsonl
+│       └── step_*.png
 └── image_privacy_labels_example.json
 ```
 
-Use the full Hugging Face dataset for benchmark numbers; use `dataset_example/` only to verify that code paths and dependencies work.
+Current contents:
+
+- `Android/`: 34 task directories, including 33 complete trajectories with screenshots, step metadata, `task_result.json`, and `traj.jsonl`; task directory `62` is retained as an incomplete example directory.
+- `PC/`: 26 complete trajectories with `instruction.txt`, `traj.jsonl`, and step screenshots.
+- `image_privacy_labels_example.json`: region-level privacy labels for the example screenshots.
+
+Use the full Hugging Face dataset for benchmark numbers; use `dataset_example/` only for review, smoke tests, and dependency checks.
 
 ## Environment Variables
 
