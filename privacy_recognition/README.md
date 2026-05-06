@@ -78,8 +78,11 @@ For the repository example data:
 python run_dataset.py ../dataset_example \
   --model "<model_name>" \
   --output-root outputs/predictions \
-  --task-limit 2
+  --task-limit 2 \
+  --prompt-mode compact
 ```
+
+Use `--prompt-mode compact` for small-context local models during smoke tests. Omit it to use the full benchmark prompt.
 
 For a single Android-style task, the lightweight runner is also available:
 

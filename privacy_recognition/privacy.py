@@ -179,6 +179,35 @@ def get_prompt_template():
     return prompt_template
 
 
+def get_compact_prompt_template():
+    """Short prompt for local small-context models and smoke tests."""
+    return """
+        Goal: {goal}
+        Agent response: {response}
+
+        Identify privacy-sensitive visible regions in the screenshot.
+        Risk must be one of: high, medium, low, none.
+        Category for private items must be one number from 1 to 6:
+        1 identity, 2 contact/financial, 3 technical/device/location/time,
+        4 behavior/context, 5 sensitive category, 6 inference/profile.
+
+        Output one line per item:
+        text | risk | category | {{"x1":0,"y1":0,"x2":0,"y2":0}} | necessary
+
+        Coordinates must use 0-1000 normalized image coordinates.
+        Use "not_necessary" when the item is not strictly required for the task.
+        If no privacy-sensitive content is visible, output one line for the main public UI region with risk none.
+    """
+
+
+def get_prompt_template_by_mode(mode: str = "full"):
+    if mode == "compact":
+        return get_compact_prompt_template()
+    if mode != "full":
+        raise ValueError(f"Unsupported prompt mode: {mode}")
+    return get_prompt_template()
+
+
 def parse_ai_output(ai_output: str):
     """Parse AI output and extract privacy items as a list of dicts."""
     items = []
@@ -344,7 +373,7 @@ def process_folder(folder_path: str, model_name: str):
     )
     os.makedirs(output_folder, exist_ok=True)
 
-    prompt_template = get_prompt_template()
+    prompt_template = get_prompt_template_by_mode(os.getenv("PRIVACY_PROMPT_MODE", "full"))
     all_results = []
 
     for idx, (image_file, plan) in enumerate(zip(image_files, plans)):

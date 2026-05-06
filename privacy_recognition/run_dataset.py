@@ -105,7 +105,7 @@ def collect_task(task_dir: Path):
     raise ValueError(f"Unsupported task layout: {task_dir}")
 
 
-def run_task(task_dir: Path, model_name: str, output_root: Path, overwrite: bool):
+def run_task(task_dir: Path, model_name: str, output_root: Path, overwrite: bool, prompt_mode: str):
     task_type, goal, image_files, responses = collect_task(task_dir)
     if not image_files or not responses:
         raise ValueError(f"No usable image/response pairs: {task_dir}")
@@ -118,7 +118,7 @@ def run_task(task_dir: Path, model_name: str, output_root: Path, overwrite: bool
         return "skipped"
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    prompt_template = privacy.get_prompt_template()
+    prompt_template = privacy.get_prompt_template_by_mode(prompt_mode)
     all_results = []
 
     print(f"\nProcessing {task_dir} [{task_type}]")
@@ -171,6 +171,12 @@ def main():
         action="store_true",
         help="Overwrite existing outputs",
     )
+    parser.add_argument(
+        "--prompt-mode",
+        choices=["full", "compact"],
+        default="full",
+        help="Use compact for small-context local models and smoke tests.",
+    )
     args = parser.parse_args()
 
     privacy.get_client()
@@ -189,7 +195,13 @@ def main():
     failed = 0
     for task_dir in task_dirs:
         try:
-            status = run_task(task_dir, args.model, Path(args.output_root), args.overwrite)
+            status = run_task(
+                task_dir,
+                args.model,
+                Path(args.output_root),
+                args.overwrite,
+                args.prompt_mode,
+            )
             if status == "skipped":
                 skipped += 1
             else:

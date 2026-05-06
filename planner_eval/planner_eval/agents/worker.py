@@ -54,6 +54,7 @@ class Worker(BaseModule):
 
         self.temperature = worker_engine_params.get("temperature", 0.0)
         self.memory_mode = worker_engine_params.get("memory_mode", AUTO_MEMORY)
+        self.prompt_mode = worker_engine_params.get("prompt_mode", "full")
         self.use_thinking = worker_engine_params.get("model", "") in [
             "claude-opus-4-20250514",
             "claude-sonnet-4-20250514",
@@ -78,9 +79,14 @@ class Worker(BaseModule):
         ):
             skipped_actions.append("call_code_agent")
 
-        sys_prompt = PROCEDURAL_MEMORY.construct_simple_worker_procedural_memory(
-            type(self.grounding_agent), skipped_actions=skipped_actions
-        ).replace("CURRENT_OS", self.platform)
+        if self.prompt_mode == "compact":
+            sys_prompt = PROCEDURAL_MEMORY.construct_compact_worker_procedural_memory(
+                type(self.grounding_agent), skipped_actions=skipped_actions
+            )
+        else:
+            sys_prompt = PROCEDURAL_MEMORY.construct_simple_worker_procedural_memory(
+                type(self.grounding_agent), skipped_actions=skipped_actions
+            ).replace("CURRENT_OS", self.platform)
 
         self.generator_agent = self._create_agent(sys_prompt)
         self.reflection_agent = self._create_agent(

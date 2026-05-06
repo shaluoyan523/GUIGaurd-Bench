@@ -144,11 +144,13 @@ planner-eval-pipeline \
   --api-key "$OPENAI_API_KEY" \
   --original-android-base ../dataset_example/Android \
   --original-pc-base ../dataset_example/PC \
+  --prompt-mode compact \
   --skip-masks \
   --skip-evaluation
 ```
 
 Use `--mask-dataset-root` only when protected variants such as `output_black_mask/` and `output_replace_llm_mask/` are available.
+Use `--prompt-mode compact` for small-context local models during smoke tests; benchmark runs use the default full prompt.
 
 ## Judge Model Configuration
 

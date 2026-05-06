@@ -65,6 +65,7 @@ def build_agent(
     platform: str = "linux",
     max_trajectory_length: int = 8,
     memory_mode: str = "auto",
+    prompt_mode: str = "full",
     enable_reflection: bool = True,
 ) -> AgentS3:
     engine_params = {
@@ -74,6 +75,7 @@ def build_agent(
         "api_key": model_api_key,
         "temperature": model_temperature,
         "memory_mode": memory_mode,
+        "prompt_mode": prompt_mode,
     }
     grounding_agent = SimpleACI()
     return AgentS3(
@@ -231,6 +233,7 @@ def evaluate_directory(
     platform: str = "linux",
     max_trajectory_length: int = 8,
     memory_mode: str = "auto",
+    prompt_mode: str = "full",
     enable_reflection: bool = True,
     output_file: str | Path | None = None,
 ) -> Dict[str, Any]:
@@ -244,6 +247,7 @@ def evaluate_directory(
         platform=platform,
         max_trajectory_length=max_trajectory_length,
         memory_mode=memory_mode,
+        prompt_mode=prompt_mode,
         enable_reflection=enable_reflection,
     )
     results = run_trajectory_evaluation(
@@ -282,6 +286,11 @@ def main() -> None:
         choices=["auto", "online_full", "local_single_image"],
     )
     parser.add_argument(
+        "--prompt-mode",
+        default="full",
+        choices=["full", "compact"],
+    )
+    parser.add_argument(
         "--enable-reflection",
         action="store_true",
         default=True,
@@ -311,6 +320,7 @@ def main() -> None:
         platform=args.platform,
         max_trajectory_length=args.max_trajectory_length,
         memory_mode=args.memory_mode,
+        prompt_mode=args.prompt_mode,
         enable_reflection=args.enable_reflection,
         output_file=args.output_file,
     )

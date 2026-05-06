@@ -81,6 +81,46 @@ class PROCEDURAL_MEMORY:
         )
         return procedural_memory.strip()
 
+    @staticmethod
+    def construct_compact_worker_procedural_memory(agent_class, skipped_actions):
+        actions = []
+        for attr_name in dir(agent_class):
+            if attr_name in skipped_actions:
+                continue
+            attr = getattr(agent_class, attr_name)
+            if callable(attr) and hasattr(attr, "is_agent_action"):
+                signature = inspect.signature(attr)
+                actions.append(f"agent.{attr_name}{signature}")
+
+        action_text = "\n".join(f"- {action}" for action in actions)
+        return textwrap.dedent(
+            f"""\
+            You are a UI planning agent for prerecorded screenshots.
+            Task: `TASK_DESCRIPTION`
+            Choose exactly one next action from the current screenshot.
+
+            Available actions:
+            {action_text}
+
+            Return exactly this format:
+            (Previous action verification)
+            Briefly verify the prior action.
+
+            (Screenshot Analysis)
+            Briefly describe relevant visual evidence.
+
+            (Next Action)
+            State one next action.
+
+            (Grounded Action)
+            ```python
+            agent.click("target element", 1, "left")
+            ```
+
+            Use one valid agent call only. Use agent.done() if complete or agent.fail() if impossible.
+            """
+        ).strip()
+
     REFLECTION_ON_TRAJECTORY = textwrap.dedent(
         """
         You are an expert UI evaluation assistant reflecting on another agent's

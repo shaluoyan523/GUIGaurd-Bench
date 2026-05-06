@@ -202,9 +202,12 @@ planner-eval-pipeline \
   --api-key "$OPENAI_API_KEY" \
   --original-android-base dataset_example/Android \
   --original-pc-base dataset_example/PC \
+  --prompt-mode compact \
   --skip-masks \
   --skip-evaluation
 ```
+
+Use `--prompt-mode compact` for small-context local models during smoke tests. Use the default full prompt for benchmark runs unless your model endpoint has a tight context limit.
 
 With judge scoring:
 
@@ -230,8 +233,11 @@ Run a small smoke test on the repository example data:
 python privacy_recognition/run_dataset.py dataset_example \
   --model <model-name> \
   --output-root outputs/privacy_predictions \
-  --task-limit 2
+  --task-limit 2 \
+  --prompt-mode compact
 ```
+
+Use `--prompt-mode compact` for local smoke tests. The default full prompt is intended for benchmark-quality privacy-recognition runs.
 
 Evaluate predictions against the example labels:
 
