@@ -73,6 +73,18 @@ grounding-eval \
 
 For formal click-grounding evaluation, provide one manifest JSONL and one or more box JSONL files.
 
+The repository includes a ready-to-run manifest/box example at `dataset_example/grounding_data/`.
+It contains 290 next-action click-grounding samples with images renamed from `000.jpg` to `289.jpg`
+for `original`, `black`, and `replace_llm`.
+
+```bash
+grounding-eval \
+  --config configs/dataset_example_grounding_data.json \
+  --prepare-only
+```
+
+This prepares `outputs/dataset_example_grounding_data/samples.json` without API calls.
+
 Manifest rows should include:
 
 ```json

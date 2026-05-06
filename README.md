@@ -146,6 +146,14 @@ dataset_example/
 │       ├── step_*/
 │       ├── task_result.json
 │       └── traj.jsonl
+├── grounding_data/
+│   ├── images/
+│   │   ├── original/
+│   │   ├── black/
+│   │   └── replace_llm/
+│   ├── manifest.jsonl
+│   ├── boxes.jsonl
+│   └── samples.json
 ├── PC/
 │   └── <task_id>/
 │       ├── instruction.txt
@@ -159,6 +167,7 @@ Current contents:
 - `Android/`: 34 task directories, including 33 complete trajectories with screenshots, step metadata, `task_result.json`, and `traj.jsonl`; task directory `62` is retained as an incomplete example directory.
 - `PC/`: 26 complete trajectories with `instruction.txt`, `traj.jsonl`, and step screenshots.
 - `image_privacy_labels_example.json`: region-level privacy labels for the example screenshots.
+- `grounding_data/`: 290 ScreenSpot-style next-action click grounding samples. Images are zero-based (`000.jpg` to `289.jpg`) for `original`, `black`, and `replace_llm`; `manifest.jsonl` stores plans/actions and `boxes.jsonl` stores pixel-space `[x1, y1, x2, y2]` target boxes.
 
 Use the full Hugging Face dataset for benchmark numbers; use `dataset_example/` only for review, smoke tests, and dependency checks.
 
@@ -268,6 +277,17 @@ grounding-eval \
 ```
 
 This creates `outputs/dataset_example_grounding/samples.json` without API calls. Full benchmark grounding should use the manifest/box format:
+
+The repository also includes a ready-to-run next-action grounding example:
+
+```bash
+cd grounding_eval
+grounding-eval \
+  --config configs/dataset_example_grounding_data.json \
+  --prepare-only
+```
+
+This reads `dataset_example/grounding_data/` and prepares 290 samples over `original`, `black`, and `replace_llm` image variants.
 
 Example:
 

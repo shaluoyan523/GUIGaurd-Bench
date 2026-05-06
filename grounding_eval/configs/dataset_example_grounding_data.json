@@ -1,0 +1,28 @@
+{
+  "manifest": "../dataset_example/grounding_data/manifest.jsonl",
+  "boxes": [
+    "../dataset_example/grounding_data/boxes.jsonl"
+  ],
+  "image_roots": {
+    "original": "../dataset_example/grounding_data/images/original",
+    "black": "../dataset_example/grounding_data/images/black",
+    "replace_llm": "../dataset_example/grounding_data/images/replace_llm"
+  },
+  "masks": [
+    "original",
+    "black",
+    "replace_llm"
+  ],
+  "models": [
+    "qwen3.5-397b-a17b"
+  ],
+  "out_dir": "outputs/dataset_example_grounding_data",
+  "base_url": "https://api.openai.com/v1",
+  "api_key_env": "OPENAI_API_KEY",
+  "workers": 4,
+  "jpeg_quality": 90,
+  "max_retries": 2,
+  "max_tokens": 1024,
+  "norm_modes": {},
+  "parse_modes": {}
+}
