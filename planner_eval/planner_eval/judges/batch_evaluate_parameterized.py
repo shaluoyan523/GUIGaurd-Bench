@@ -33,6 +33,9 @@ class CustomSemanticConsistencyGrader(SemanticConsistencyGrader):
         self.api_key = api_key
         self.base_url = base_url
         self.api_log_path = api_log_path
+        self.request_timeout = float(os.getenv("JUDGE_REQUEST_TIMEOUT_SECONDS", "180"))
+        self.retry_backoff_initial = float(os.getenv("JUDGE_RETRY_BACKOFF_SECONDS", "15"))
+        self.retry_backoff_max = float(os.getenv("JUDGE_RETRY_BACKOFF_MAX_SECONDS", "120"))
         self._client = None
 
     def _get_client(self):
@@ -40,8 +43,10 @@ class CustomSemanticConsistencyGrader(SemanticConsistencyGrader):
             openai_client = OpenAI(
                 api_key=self.api_key,
                 base_url=self.base_url,
+                timeout=self.request_timeout,
+                max_retries=0,
                 default_headers={
-                    "HTTP-Referer": "https://github.com",
+                    "HTTP-Referer": "https://anonymous.4open.science/r/GUIGaurd-Bench-CA4F/",
                     "X-Title": "planner_eval semantic consistency evaluation",
                 },
             )
@@ -78,7 +83,7 @@ class CustomSemanticConsistencyGrader(SemanticConsistencyGrader):
         client = self._get_client()
 
         attempt = 0
-        backoff_seconds = 1.0
+        backoff_seconds = self.retry_backoff_initial
         while True:
             try:
                 judgment = client.chat.completions.create(
@@ -121,6 +126,12 @@ class CustomSemanticConsistencyGrader(SemanticConsistencyGrader):
                     attempt,
                     payload,
                 )
+                logging.info(
+                    "Judge retry backoff (model=%s attempt=%d): sleeping %.1fs before next request",
+                    self.model,
+                    attempt,
+                    backoff_seconds,
+                )
                 self._append_api_log(
                     {
                         "timestamp": datetime.now().isoformat(),
@@ -132,10 +143,11 @@ class CustomSemanticConsistencyGrader(SemanticConsistencyGrader):
                             "user_prompt": user_prompt,
                         },
                         "error": payload,
+                        "next_retry_delay_seconds": backoff_seconds,
                     }
                 )
                 time.sleep(backoff_seconds)
-                backoff_seconds = min(backoff_seconds * 1.5, 60.0)
+                backoff_seconds = min(backoff_seconds * 1.5, self.retry_backoff_max)
 
     def _append_api_log(self, entry: dict) -> None:
         if not self.api_log_path:
@@ -163,13 +175,13 @@ def extract_plans(data: dict) -> list[str]:
 
 def get_score_label(score: int) -> str:
     labels = {
-        0: "Completely inconsistent",
-        1: "Minimally consistent",
-        2: "Partially consistent",
-        3: "Mostly consistent",
-        4: "Fully consistent",
+        0: "完全不一致",
+        1: "最低程度一致",
+        2: "部分一致",
+        3: "大部分一致",
+        4: "完全一致",
     }
-    return labels.get(score, "Unknown")
+    return labels.get(score, "未知")
 
 
 def _coerce_score(score: Any) -> float:
@@ -253,7 +265,7 @@ def evaluate_mask_method(
 ) -> dict | None:
     print("")
     print("=" * 80)
-    print(f"Evaluating mask method: {mask_name}")
+    print(f"评估 Mask 方法: {mask_name}")
     print("=" * 80)
 
     gt_files = list(gt_dir.glob("*_result.json"))
@@ -274,9 +286,9 @@ def evaluate_mask_method(
         matched_pairs.append((gt_file, replay_file, replay_stem))
         seen_task_names.add(replay_stem)
 
-    print(f"Found {len(matched_pairs)} matched sample pairs")
+    print(f"找到 {len(matched_pairs)} 对样本")
     if not matched_pairs:
-        print(f"Warning: no matched samples found for {mask_name}")
+        print(f"警告: 未找到 {mask_name} 的匹配样本")
         return None
 
     all_results = []
@@ -319,16 +331,16 @@ def evaluate_mask_method(
     )
 
     print("")
-    print(f"{mask_name} summary:")
+    print(f"{mask_name} 汇总:")
     print(
-        f"  Total score: {summary['summary']['total_score']}/{summary['summary']['max_score']}"
+        f"  总分: {summary['summary']['total_score']}/{summary['summary']['max_score']}"
     )
-    print(f"  Average score: {summary['summary']['avg_score']:.2f}/4")
+    print(f"  平均分: {summary['summary']['avg_score']:.2f}/4")
     print(
-        "  Average consistency rate: "
+        "  平均一致性率: "
         f"{summary['summary']['avg_consistency_rate']:.2%}"
     )
-    print(f"  Results saved to: {output_file}")
+    print(f"  结果已保存: {output_file}")
     return summary
 
 
@@ -355,13 +367,13 @@ def run_batch_evaluation(
     mask_methods.sort()
 
     print("")
-    print(f"Found {len(mask_methods)} mask methods: {', '.join(mask_methods)}")
+    print(f"找到 {len(mask_methods)} 个 mask 方法: {', '.join(mask_methods)}")
 
     all_mask_results = []
     start_time = datetime.now()
     for index, mask_name in enumerate(mask_methods, start=1):
         print("")
-        print(f"[{index}/{len(mask_methods)}] Starting evaluation for {mask_name}...")
+        print(f"[{index}/{len(mask_methods)}] 开始评估 {mask_name}...")
         mask_result = evaluate_mask_method(
             mask_name=mask_name,
             gt_dir=gt_dir,
@@ -421,11 +433,11 @@ def run_batch_evaluation(
 
     print("")
     print("=" * 80)
-    print(f"Evaluation complete. Overall summary for {model_name}:")
+    print(f"评估完成！{model_name} 总体汇总：")
     print("=" * 80)
-    print(f"Evaluation time: {duration:.1f} seconds")
+    print(f"评估时长: {duration:.1f} 秒")
     print("")
-    print("Mask method ranking by average score:")
+    print("Mask 方法排名（按平均分）：")
     print("-" * 80)
     for rank, item in enumerate(
         sorted(
@@ -436,32 +448,32 @@ def run_batch_evaluation(
         start=1,
     ):
         print(
-            f"{rank:>2}. {item['mask_method']} - Average: "
+            f"{rank:>2}. {item['mask_method']} - 平均: "
             f"{item['summary']['avg_score']:.2f}/4 "
             f"({item['summary']['avg_consistency_rate']:.1%}) - "
-            f"Total score: {item['summary']['total_score']}/{item['summary']['max_score']}"
+            f"总分: {item['summary']['total_score']}/{item['summary']['max_score']}"
         )
     print("")
-    print("Overall statistics:")
+    print("总体统计:")
     print(
-        f"  Total samples: {overall_summary['overall_statistics']['total_samples']}"
+        f"  总样本数: {overall_summary['overall_statistics']['total_samples']}"
     )
     print(
-        "  Total score: "
+        "  总分: "
         f"{overall_summary['overall_statistics']['total_score']}/"
         f"{overall_summary['overall_statistics']['total_max_score']}"
     )
     print(
-        "  Average score: "
+        "  平均分: "
         f"{overall_summary['overall_statistics']['avg_score_across_all']:.2f}/4"
     )
     print(
-        "  Average consistency rate: "
+        "  平均一致性率: "
         f"{overall_summary['overall_statistics']['avg_consistency_rate_across_all']:.2%}"
     )
     print("")
-    print(f"All results saved to: {output_dir}")
-    print(f"Overall summary file: {summary_file}")
+    print(f"所有结果已保存到: {output_dir}")
+    print(f"总汇总文件: {summary_file}")
     print("=" * 80)
     return overall_summary
 
@@ -473,7 +485,7 @@ def main() -> None:
     parser.add_argument("--replay-dir", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--model-name", default="unknown")
-    parser.add_argument("--judge-model", default=os.getenv("JUDGE_MODEL", "openai/gpt-5"))
+    parser.add_argument("--judge-model", default=os.getenv("JUDGE_MODEL", "gpt-5"))
     parser.add_argument("--judge-api-key", default=os.getenv("JUDGE_API_KEY", ""))
     parser.add_argument("--judge-base-url", default=os.getenv("JUDGE_BASE_URL", ""))
     args = parser.parse_args()
