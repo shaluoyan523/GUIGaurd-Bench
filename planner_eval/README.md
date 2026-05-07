@@ -2,7 +2,7 @@
 
 `planner_eval` is a cleaned, self-contained extraction of the trajectory-evaluation workflow from the original `s3_planner` codebase.
 
-It is designed for GitHub release and focuses on one reproducible pipeline:
+It is designed for public release and focuses on one reproducible pipeline:
 
 1. Run a planning model on prerecorded screenshot trajectories.
 2. Compare original trajectories against multiple masked variants.
@@ -135,22 +135,6 @@ planner-eval-pipeline \
   --original-android-base /data/Android \
   --original-pc-base /data/PC
 ```
-
-For the repository `dataset_example/` directory, run only the original trajectories:
-
-```bash
-planner-eval-pipeline \
-  --model gpt-5 \
-  --api-key "$OPENAI_API_KEY" \
-  --original-android-base ../dataset_example/Android \
-  --original-pc-base ../dataset_example/PC \
-  --prompt-mode compact \
-  --skip-masks \
-  --skip-evaluation
-```
-
-Use `--mask-dataset-root` only when protected variants such as `output_black_mask/` and `output_replace_llm_mask/` are available.
-Use `--prompt-mode compact` for small-context local models during smoke tests; benchmark runs use the default full prompt.
 
 ## Judge Model Configuration
 
