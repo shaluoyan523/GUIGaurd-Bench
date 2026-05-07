@@ -1,0 +1,503 @@
+{
+  "@context": {
+    "@language": "en",
+    "@vocab": "https://schema.org/",
+    "cr": "http://mlcommons.org/croissant/",
+    "sc": "https://schema.org/",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "prov": "http://www.w3.org/ns/prov#",
+    "dct": "http://purl.org/dc/terms/",
+    "citeAs": "cr:citeAs",
+    "column": "cr:column",
+    "conformsTo": "dct:conformsTo",
+    "data": "cr:data",
+    "dataType": {
+      "@id": "cr:dataType",
+      "@type": "@vocab"
+    },
+    "extract": "cr:extract",
+    "field": "cr:field",
+    "fileObject": "cr:fileObject",
+    "fileSet": "cr:fileSet",
+    "format": "cr:format",
+    "includes": "cr:includes",
+    "isLiveDataset": "cr:isLiveDataset",
+    "jsonPath": "cr:jsonPath",
+    "key": "cr:key",
+    "md5": "cr:md5",
+    "parentField": "cr:parentField",
+    "path": "cr:path",
+    "recordSet": "cr:recordSet",
+    "references": "cr:references",
+    "regex": "cr:regex",
+    "repeated": "cr:repeated",
+    "replace": "cr:replace",
+    "separator": "cr:separator",
+    "source": "cr:source",
+    "subField": "cr:subField",
+    "transform": "cr:transform",
+    "equivalentProperty": "sc:equivalentProperty",
+    "samplingRate": "sc:samplingRate",
+    "examples": "sc:workExample"
+  },
+  "@type": "sc:Dataset",
+  "@language": "en",
+  "name": "GUIGuard-Bench GitHub Repository",
+  "description": "GitHub repository artifact for GUIGuard-Bench, containing evaluation code, package documentation, and example data for privacy-aware GUI-agent evaluation. The repository includes planner evaluation, privacy recognition, and ScreenSpot-style grounding evaluation packages, plus a dataset_example subset with 60 trajectory tasks (34 Android + 26 PC), 897 original trajectory screenshots, region-level privacy labels, and 290 grounding samples with original, black-mask, and LLM-replacement image variants. The full official benchmark data is hosted separately on Hugging Face.",
+  "citeAs": "GUIGuard-Bench Authors. GUIGuard-Bench: A Benchmark for Privacy-Aware GUI Agents. 2026. Under review.",
+  "citation": "GUIGuard-Bench Authors. GUIGuard-Bench: A Benchmark for Privacy-Aware GUI Agents. 2026. Under review.",
+  "url": "https://github.com/shaluoyan523/GUIGuard-Bench",
+  "sameAs": [
+    "https://huggingface.co/datasets/ShaofantuoshuzhengzhiSha/GUIGuard-Bench"
+  ],
+  "version": "1.0.0",
+  "dct:conformsTo": [
+    "http://mlcommons.org/croissant/1.1",
+    "http://mlcommons.org/croissant/RAI/1.0"
+  ],
+  "license": [
+    {
+      "@type": "sc:CreativeWork",
+      "name": "MIT",
+      "url": "https://opensource.org/license/mit"
+    }
+  ],
+  "creator": {
+    "@type": "sc:Organization",
+    "name": "GUIGuard-Bench Authors"
+  },
+  "datePublished": "2026",
+  "keywords": [
+    "gui-agent",
+    "privacy",
+    "trajectory",
+    "screenshot",
+    "android",
+    "pc",
+    "multimodal",
+    "evaluation",
+    "grounding"
+  ],
+  "isAccessibleForFree": true,
+  "isLiveDataset": false,
+  "distribution": [
+    {
+      "@id": "README.md",
+      "@type": "cr:FileObject",
+      "name": "Repository README",
+      "description": "Top-level GitHub README describing GUIGuard-Bench evaluation packages and dataset access.",
+      "contentUrl": "https://raw.githubusercontent.com/shaluoyan523/GUIGuard-Bench/master/README.md",
+      "encodingFormat": "text/markdown",
+      "sha256": "f7961f6d3f6809f6ae61bf5b679d03595b79c64a15a2687dfccdb1b5a89e065b"
+    },
+    {
+      "@id": "dataset_example/image_privacy_labels_example.json",
+      "@type": "cr:FileObject",
+      "name": "Example privacy labels",
+      "description": "Region-level privacy annotations for the GitHub dataset_example subset. The official full benchmark labels are distributed through Hugging Face.",
+      "contentUrl": "https://raw.githubusercontent.com/shaluoyan523/GUIGuard-Bench/master/dataset_example/image_privacy_labels_example.json",
+      "encodingFormat": "application/json",
+      "sha256": "c94f5e5b26d4fa0e461bf94116aed88a9b128d4da8410caedba612111242f683"
+    },
+    {
+      "@id": "dataset_example/grounding_data/manifest.jsonl",
+      "@type": "cr:FileObject",
+      "name": "Grounding example manifest",
+      "description": "Grounding sample manifest with plan text, target action, and target element for 290 example samples.",
+      "contentUrl": "https://raw.githubusercontent.com/shaluoyan523/GUIGuard-Bench/master/dataset_example/grounding_data/manifest.jsonl",
+      "encodingFormat": "application/jsonlines",
+      "sha256": "0cd6681a25d989ec0e925c75d3ea06807e1738d3a853c824de473cec0476b23f"
+    },
+    {
+      "@id": "dataset_example/grounding_data/boxes.jsonl",
+      "@type": "cr:FileObject",
+      "name": "Grounding example boxes",
+      "description": "Ground-truth click boxes for 290 example grounding samples.",
+      "contentUrl": "https://raw.githubusercontent.com/shaluoyan523/GUIGuard-Bench/master/dataset_example/grounding_data/boxes.jsonl",
+      "encodingFormat": "application/jsonlines",
+      "sha256": "2031773908cb23f308768740901e651146cf80a3326b9904b9aa202cf067bff0"
+    },
+    {
+      "@id": "dataset_example/grounding_data/samples.json",
+      "@type": "cr:FileObject",
+      "name": "Prepared grounding example samples",
+      "description": "Prepared grounding samples derived from the manifest and boxes for repository smoke tests.",
+      "contentUrl": "https://raw.githubusercontent.com/shaluoyan523/GUIGuard-Bench/master/dataset_example/grounding_data/samples.json",
+      "encodingFormat": "application/json",
+      "sha256": "7c0c5049f7f5bd22d2a7bace35ffce839d11b7f076ecda696247e63c3eb24d8c"
+    },
+    {
+      "@id": "planner_eval",
+      "@type": "cr:FileSet",
+      "name": "planner_eval package",
+      "description": "Trajectory-level protected-screen planning evaluation package.",
+      "encodingFormat": "text/x-python",
+      "includes": "planner_eval/**"
+    },
+    {
+      "@id": "privacy_recognition",
+      "@type": "cr:FileSet",
+      "name": "privacy_recognition package",
+      "description": "Privacy recognition evaluation package for region-level sensitive information detection.",
+      "encodingFormat": "text/x-python",
+      "includes": "privacy_recognition/**"
+    },
+    {
+      "@id": "grounding_eval",
+      "@type": "cr:FileSet",
+      "name": "grounding_eval package",
+      "description": "ScreenSpot-style grounding evaluation package for click-point prediction.",
+      "encodingFormat": "text/x-python",
+      "includes": "grounding_eval/**"
+    }
+  ],
+  "recordSet": [
+    {
+      "@id": "grounding_manifest",
+      "@type": "cr:RecordSet",
+      "name": "grounding_manifest",
+      "description": "Materializable record set for dataset_example/grounding_data/manifest.jsonl. Each row describes one grounding sample with the source image name, next-action plan, action string, and target UI element. The example contains 290 rows.",
+      "field": [
+        {
+          "@id": "grounding_manifest/id",
+          "@type": "cr:Field",
+          "name": "id",
+          "description": "Zero-based grounding sample id.",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "dataset_example/grounding_data/manifest.jsonl"
+            },
+            "extract": {
+              "column": "id"
+            }
+          }
+        },
+        {
+          "@id": "grounding_manifest/original_id",
+          "@type": "cr:Field",
+          "name": "original_id",
+          "description": "Original sample id before copying into the example manifest.",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "dataset_example/grounding_data/manifest.jsonl"
+            },
+            "extract": {
+              "column": "original_id"
+            }
+          }
+        },
+        {
+          "@id": "grounding_manifest/image_name",
+          "@type": "cr:Field",
+          "name": "image_name",
+          "description": "Image file name in grounding_data/images/<variant>.",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dataset_example/grounding_data/manifest.jsonl"
+            },
+            "extract": {
+              "column": "image_name"
+            }
+          }
+        },
+        {
+          "@id": "grounding_manifest/copied_image_name",
+          "@type": "cr:Field",
+          "name": "copied_image_name",
+          "description": "Copied image file name used by the evaluator.",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dataset_example/grounding_data/manifest.jsonl"
+            },
+            "extract": {
+              "column": "copied_image_name"
+            }
+          }
+        },
+        {
+          "@id": "grounding_manifest/plan",
+          "@type": "cr:Field",
+          "name": "plan",
+          "description": "Plan and action rationale supplied to the grounding model.",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dataset_example/grounding_data/manifest.jsonl"
+            },
+            "extract": {
+              "column": "plan"
+            }
+          }
+        },
+        {
+          "@id": "grounding_manifest/action",
+          "@type": "cr:Field",
+          "name": "action",
+          "description": "Target click action string.",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dataset_example/grounding_data/manifest.jsonl"
+            },
+            "extract": {
+              "column": "action"
+            }
+          }
+        },
+        {
+          "@id": "grounding_manifest/target",
+          "@type": "cr:Field",
+          "name": "target",
+          "description": "Natural-language target UI element.",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dataset_example/grounding_data/manifest.jsonl"
+            },
+            "extract": {
+              "column": "target"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "@id": "grounding_boxes",
+      "@type": "cr:RecordSet",
+      "name": "grounding_boxes",
+      "description": "Materializable record set for dataset_example/grounding_data/boxes.jsonl. Each row gives a target action and ground-truth bounding box for ScreenSpot-style point-in-box grounding evaluation. The example contains 290 rows.",
+      "field": [
+        {
+          "@id": "grounding_boxes/id",
+          "@type": "cr:Field",
+          "name": "id",
+          "description": "Zero-based grounding sample id.",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "dataset_example/grounding_data/boxes.jsonl"
+            },
+            "extract": {
+              "column": "id"
+            }
+          }
+        },
+        {
+          "@id": "grounding_boxes/original_id",
+          "@type": "cr:Field",
+          "name": "original_id",
+          "description": "Original sample id.",
+          "dataType": "sc:Integer",
+          "source": {
+            "fileObject": {
+              "@id": "dataset_example/grounding_data/boxes.jsonl"
+            },
+            "extract": {
+              "column": "original_id"
+            }
+          }
+        },
+        {
+          "@id": "grounding_boxes/image_name",
+          "@type": "cr:Field",
+          "name": "image_name",
+          "description": "Image file name in grounding_data/images/<variant>.",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dataset_example/grounding_data/boxes.jsonl"
+            },
+            "extract": {
+              "column": "image_name"
+            }
+          }
+        },
+        {
+          "@id": "grounding_boxes/action",
+          "@type": "cr:Field",
+          "name": "action",
+          "description": "Target click action string.",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dataset_example/grounding_data/boxes.jsonl"
+            },
+            "extract": {
+              "column": "action"
+            }
+          }
+        },
+        {
+          "@id": "grounding_boxes/target",
+          "@type": "cr:Field",
+          "name": "target",
+          "description": "Natural-language target UI element.",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dataset_example/grounding_data/boxes.jsonl"
+            },
+            "extract": {
+              "column": "target"
+            }
+          }
+        },
+        {
+          "@id": "grounding_boxes/bbox_xyxy",
+          "@type": "cr:Field",
+          "name": "bbox_xyxy",
+          "description": "Ground-truth bounding box [x1, y1, x2, y2] in image pixel coordinates. Kept as text/list by JSONL readers for compatibility.",
+          "dataType": "sc:Text",
+          "source": {
+            "fileObject": {
+              "@id": "dataset_example/grounding_data/boxes.jsonl"
+            },
+            "extract": {
+              "column": "bbox_xyxy"
+            }
+          }
+        },
+        {
+          "@id": "grounding_boxes/target_visible",
+          "@type": "cr:Field",
+          "name": "target_visible",
+          "description": "Whether the target element is visible.",
+          "dataType": "sc:Boolean",
+          "source": {
+            "fileObject": {
+              "@id": "dataset_example/grounding_data/boxes.jsonl"
+            },
+            "extract": {
+              "column": "target_visible"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "rai:dataCollection": "The GitHub repository artifact packages evaluation code and a dataset_example subset for smoke tests and demonstrations. The example subset contains 60 GUI trajectory tasks (34 Android and 26 PC), 897 original trajectory screenshots, region-level privacy annotations, and 290 grounding examples with original, black-mask, and LLM-replacement image variants. The official full benchmark split is hosted separately on Hugging Face.",
+  "rai:dataCollectionType": [
+    "GitHub repository artifact",
+    "Evaluation code",
+    "Example GUI trajectory subset",
+    "Example grounding benchmark data"
+  ],
+  "rai:dataCollectionRawData": "The repository contains code, documentation, and example data derived from the GUIGuard-Bench benchmark. Full raw benchmark data is not stored in this GitHub repository; users should download the official dataset from Hugging Face.",
+  "rai:dataCollectionTimeFrame": [
+    "2025-11-01",
+    "2026-01-31"
+  ],
+  "rai:dataPreprocessingProtocol": [
+    "Example trajectory screenshots and annotation files are packaged in dataset_example for smoke testing the evaluation code.",
+    "Grounding examples are prepared as manifest.jsonl, boxes.jsonl, samples.json, and three image variants: original, black, and replace_llm.",
+    "Evaluation packages use OpenAI-compatible APIs and deterministic local parsing/normalization utilities."
+  ],
+  "rai:dataAnnotationProtocol": [
+    "Privacy annotations in dataset_example/image_privacy_labels_example.json are region-level labels derived from the GUIGuard-Bench annotation workflow.",
+    "Grounding boxes in dataset_example/grounding_data/boxes.jsonl specify target-visible click regions in [x1, y1, x2, y2] pixel coordinates.",
+    "The full annotation protocol, quality review, and official benchmark split are documented in the Hugging Face dataset metadata."
+  ],
+  "rai:dataAnnotationPlatform": [
+    "https://www.molardata.com/"
+  ],
+  "rai:dataAnnotationAnalysis": [
+    "The GitHub example data is for smoke tests and reproducibility checks; official benchmark metrics should be computed on the Hugging Face dataset split."
+  ],
+  "rai:annotationsPerItem": "The GitHub grounding example has one click target box per grounding sample. The privacy-label example file contains region-level privacy annotations per screenshot.",
+  "rai:annotatorDemographics": [
+    "See the official Hugging Face dataset metadata for full annotation-team documentation."
+  ],
+  "rai:machineAnnotationTools": [
+    "Evaluation code supports OpenAI-compatible multimodal models, LLM-as-judge scoring, and ScreenSpot-style point parsing."
+  ],
+  "rai:dataBiases": [
+    "The GitHub dataset_example subset is a small demonstration subset and should not be treated as representative of the full benchmark distribution.",
+    "The example data focuses on Android and PC GUI screenshots and inherits platform, language, and application biases from the underlying benchmark."
+  ],
+  "rai:dataUseCases": [
+    "Installing and testing GUIGuard-Bench evaluation packages.",
+    "Smoke-testing protected-screen planning, privacy recognition, and click grounding pipelines.",
+    "Reproducing example data loading and output formats before running the full Hugging Face benchmark."
+  ],
+  "rai:dataLimitations": [
+    "The GitHub repository is not the complete official benchmark dataset.",
+    "dataset_example is intended for code-path validation and small demonstrations, not final benchmark reporting.",
+    "Full benchmark evaluation requires downloading the Hugging Face dataset."
+  ],
+  "rai:dataSocialImpact": "The repository supports research on privacy-aware GUI agents by providing reproducible evaluation code and examples for privacy recognition, protected-screen planning, and GUI grounding under privacy transformations.",
+  "rai:personalSensitiveInformation": [
+    "Example screenshots may contain synthetic or controlled personal-looking UI content used for privacy-risk evaluation.",
+    "Users should treat screenshots and labels as privacy-sensitive research data and follow the repository and dataset license terms."
+  ],
+  "rai:hasSyntheticData": "Partially. The GitHub repository includes example GUI screenshots and annotations derived from the GUIGuard-Bench benchmark, plus protected image variants such as black masks and LLM-replacement images. The full official benchmark split is distributed separately on Hugging Face.",
+  "prov:wasDerivedFrom": "GUIGuard-Bench benchmark data and evaluation workflows. The GitHub repository packages code, documentation, and example subsets; the full benchmark data is hosted on Hugging Face.",
+  "prov:wasGeneratedBy": [
+    {
+      "@type": "prov:Activity",
+      "name": "Repository Packaging",
+      "type": "Postprocessing",
+      "activityType": "Postprocessing",
+      "prov:type": "Postprocessing",
+      "description": "Evaluation workflows were cleaned and packaged into planner_eval, privacy_recognition, and grounding_eval Python packages with README files, example configs, scripts, and tests.",
+      "agent": [
+        {
+          "@type": "prov:Person",
+          "role": "Research team",
+          "description": "Research team packaged the benchmark evaluation code for GitHub release."
+        }
+      ]
+    },
+    {
+      "@type": "prov:Activity",
+      "name": "Example Data Preparation",
+      "type": "Preprocessing",
+      "activityType": "Preprocessing",
+      "prov:type": "Preprocessing",
+      "description": "A subset of GUI trajectories, privacy labels, grounding manifests, target boxes, and protected image variants was selected and organized under dataset_example for smoke tests and demonstrations.",
+      "agent": [
+        {
+          "@type": "prov:Person",
+          "role": "Research team",
+          "description": "Research team prepared the example data subset and repository data layout."
+        }
+      ]
+    }
+  ],
+  "rai:dataReleaseMaintenancePlan": "This GitHub repository is a static code and example-data release for GUIGuard-Bench v1.0.0. Updates may be released through normal GitHub commits/tags; full benchmark data updates are maintained through the Hugging Face dataset repository.",
+  "prov:activity": [
+    {
+      "@type": "prov:Activity",
+      "name": "Repository Packaging",
+      "type": "Postprocessing",
+      "activityType": "Postprocessing",
+      "prov:type": "Postprocessing",
+      "description": "Evaluation workflows were cleaned and packaged into planner_eval, privacy_recognition, and grounding_eval Python packages with README files, example configs, scripts, and tests.",
+      "agent": [
+        {
+          "@type": "prov:Person",
+          "role": "Research team",
+          "description": "Research team packaged the benchmark evaluation code for GitHub release."
+        }
+      ]
+    },
+    {
+      "@type": "prov:Activity",
+      "name": "Example Data Preparation",
+      "type": "Preprocessing",
+      "activityType": "Preprocessing",
+      "prov:type": "Preprocessing",
+      "description": "A subset of GUI trajectories, privacy labels, grounding manifests, target boxes, and protected image variants was selected and organized under dataset_example for smoke tests and demonstrations.",
+      "agent": [
+        {
+          "@type": "prov:Person",
+          "role": "Research team",
+          "description": "Research team prepared the example data subset and repository data layout."
+        }
+      ]
+    }
+  ]
+}
