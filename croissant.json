@@ -46,8 +46,9 @@
   "description": "GitHub repository artifact for GUIGuard-Bench, containing evaluation code, package documentation, and example data for privacy-aware GUI-agent evaluation. The repository includes planner evaluation, privacy recognition, and ScreenSpot-style grounding evaluation packages, plus a dataset_example subset with 60 trajectory tasks (34 Android + 26 PC), 897 original trajectory screenshots, region-level privacy labels, and 290 grounding samples with original, black-mask, and LLM-replacement image variants. The full official benchmark data is hosted separately on Hugging Face.",
   "citeAs": "GUIGuard-Bench Authors. GUIGuard-Bench: A Benchmark for Privacy-Aware GUI Agents. 2026. Under review.",
   "citation": "GUIGuard-Bench Authors. GUIGuard-Bench: A Benchmark for Privacy-Aware GUI Agents. 2026. Under review.",
-  "url": "https://github.com/shaluoyan523/GUIGuard-Bench",
+  "url": "https://anonymous.4open.science/r/GUIGaurd-Bench-CA4F/",
   "sameAs": [
+    "https://github.com/shaluoyan523/GUIGuard-Bench",
     "https://huggingface.co/datasets/ShaofantuoshuzhengzhiSha/GUIGuard-Bench"
   ],
   "version": "1.0.0",
